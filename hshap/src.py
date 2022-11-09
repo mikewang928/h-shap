@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torch import Tensor
 from typing import Callable, List
+from tqdm import tqdm
 from .utils import (
     hshap_features,
     shapley_matrix,
@@ -102,15 +103,16 @@ class Explainer:
         root_inputs = x.unsqueeze_(0)
 
         stop_l = int(np.log2(min(self.size[1], self.size[2]) / s)) + 2
+        print("in while loop")
         while nodes.shape[1] < stop_l:
             scores = scores.unsqueeze_(1).repeat((1, self.gamma))
-
-            for batch_start_id in range(0, len(nodes), batch_size):
+            # print("in for loop")
+            for batch_start_id in tqdm(range(0, len(nodes), batch_size)):
                 batch = nodes[batch_start_id : batch_start_id + batch_size]
                 batch_input = torch.empty_like(self.background).repeat(
                     len(batch), 2**self.gamma, 1, 1, 1
                 )
-
+                # print("in for loop")
                 for n, node in enumerate(batch):
                     batch_input[n] = self.masked_input_(
                         node[-1],
